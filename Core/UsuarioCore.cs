@@ -1,4 +1,5 @@
-﻿using Core.Util;
+﻿using Core.Interface;
+using Core.Util;
 using FluentValidation;
 using Model;
 using System;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace Core
 {
-    public class UsuarioCore: AbstractValidator<Usuario>
+    public class UsuarioCore : AbstractValidator<Usuario>
     {
         private Usuario _usuario;
         public Armazenamento _arm { get; set; }
@@ -20,7 +21,7 @@ namespace Core
 
         public UsuarioCore(Usuario Usuario)
         {
-            _usuario = Usuario;
+           _usuario = Usuario;
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
             RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres");
@@ -31,29 +32,37 @@ namespace Core
         }
 
         //Método para cadastro de usuario
-        public (bool, dynamic) CadastrarUsuario()
+        public Retorno CadastrarUsuario()
         {
             var valida = Validate(_usuario);
 
             if (!valida.IsValid)
-                return (false, valida.Errors.Select(a => a.ErrorMessage).ToList());
+                return new Retorno { Status = false, Msg = valida.Errors.Select(a => a.ErrorMessage).ToList() };
 
             _arm.Usuarios.Add(_usuario);
 
             Arquivo.Salvar(_arm);
-            return (true, _usuario);
-          
+            return new Retorno { Status = true, Msg = "Usuário cadastrado com sucesso!" };
+
         }
-        public (bool, dynamic) BuscarUsuario(string id)
+
+        //Método para logar o usuario na plataforma.
+        public Retorno LogarUsuario()
+        {
+            return null;
+        }
+
+        //Método para buscar um usuario se baseando no id fornecido.
+        public Retorno BuscarUsuario(string id)
         {
             if (!Guid.TryParse(id, out Guid ident))
-                return (false, "Id incorreto!");
-       
+                return new Retorno { Status = false, Msg = "Id incorreto!" };
+
             var umUsuario = _arm.Usuarios.FirstOrDefault(u => u.Id == ident);
 
-            if (umUsuario == null) return (false, "Esse usuario nao existe na base de dados");
+            if (umUsuario == null) return new Retorno { Status = false, Msg = "Esse usuario nao existe na base de dados" };
 
-            return (true, umUsuario);
+            return new Retorno { Status = true, Msg = umUsuario };
 
         }
     }

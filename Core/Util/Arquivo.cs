@@ -12,23 +12,15 @@ namespace Core.Util
         public static string arquivoDb = AppDomain.CurrentDomain.BaseDirectory + "db.json";
         public static Armazenamento Recuperar(Armazenamento Arquivo)
         {
-            try
-            {
-                return JsonConvert.DeserializeObject<Armazenamento>(File.ReadAllText(arquivoDb)); 
-            }
-            catch (Exception ) { return default;}
+            try { return JsonConvert.DeserializeObject<Armazenamento>(File.ReadAllText(arquivoDb)); }
+            catch (Exception) { return default; }
         }
         public static void Salvar(Armazenamento Arquivo)
         {
-            try
-            {
-                File.WriteAllText(arquivoDb, JsonConvert.SerializeObject(Arquivo));
-            }
+            try { File.WriteAllText(arquivoDb, JsonConvert.SerializeObject(Arquivo)); }
             catch (JsonException ex)
 
-            {
-                throw ex;
-            }
+            {  throw ex; }
         }
     }
 }

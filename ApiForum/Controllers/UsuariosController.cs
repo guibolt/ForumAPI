@@ -13,20 +13,20 @@ namespace ApiForum.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-
+        //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
         public async Task<IActionResult> Cadastro([FromBody] Usuario usuario)
         {
             var Core = new UsuarioCore(usuario).CadastrarUsuario();
-            return Core.Item1 ? Ok(Core.Item2) : BadRequest(Core.Item2);
+            return Core.Status ? Ok(Core.Msg) : BadRequest(Core.Msg);
          
         }
-
+        //Chamando o metodo de buscar por id usurario da core 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var Core = new UsuarioCore().BuscarUsuario(id);
-            return Core.Item1 ? Ok(Core.Item2) : BadRequest(Core.Item2);
+            return Core.Status ? Ok(Core.Msg) : BadRequest(Core.Msg);
         }
 
     }
