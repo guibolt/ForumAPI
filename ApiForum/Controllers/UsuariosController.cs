@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using Model.Views;
 
 namespace ApiForum.Controllers
 {
@@ -13,21 +15,44 @@ namespace ApiForum.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
+        // propriedade automapper
+        private readonly IMapper _mapper;
+
+        // construtor para a utilização do automapper por meio de injeçao de dependecia
+        public UsuariosController(IMapper mapper) {  _mapper = mapper; }
+
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
         public async Task<IActionResult> Cadastro([FromBody] Usuario usuario)
         {
             var Core = new UsuarioCore(usuario).CadastrarUsuario();
-            return Core.Status ? Ok(Core.Msg) : BadRequest(Core.Msg);
+            return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
          
         }
+
+        //Chamando o metodo de logar usurario da core 
+        [HttpPost("Autenticar")]
+        public async Task<IActionResult> Logar([FromBody] LoginUserView usuario)
+        {
+            var Core = new UsuarioCore(usuario,_mapper).LogarUsuario();
+            return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
+
+        }
+
         //Chamando o metodo de buscar por id usurario da core 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var Core = new UsuarioCore().BuscarUsuario(id);
-            return Core.Status ? Ok(Core.Msg) : BadRequest(Core.Msg);
+            return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
         }
 
+        //Chamando o metodo de listar todos da core 
+        [HttpGet]
+        public async Task<IActionResult> ListarTodos()
+        {
+            var Core = new UsuarioCore().Listar();
+            return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
+        }
     }
 }

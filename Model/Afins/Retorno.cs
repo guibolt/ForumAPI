@@ -7,6 +7,6 @@ namespace Model
     public class Retorno
     {
         public bool Status { get; set; }
-        public dynamic Msg { get; set; }
+        public dynamic Resultado { get; set; }
     }
 }

@@ -1,12 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Model
 {
    public class Base
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public DateTime DataCadastro { get; private set; } = DateTime.Now;
+        [JsonIgnore]
+        public Guid Id { get;  set; } = Guid.NewGuid();
+        [DisplayFormat(DataFormatString = "mm/dd/yyyy")]
+        [JsonIgnore]
+        public DateTime DataCadastro { get;  set; } = DateTime.Now;
     }
 }
