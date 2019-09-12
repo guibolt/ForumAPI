@@ -41,16 +41,32 @@ namespace Core
         }
 
         //Método para cadastro de uma publicacao
-        public Retorno Cadastrar()
+        public Retorno Cadastrar(Guid token)
         {
             var valida = Validate(_publicacao);
 
             if (!valida.IsValid)
                 return new Retorno { Status = false, Resultado = valida.Errors.Select(e => e.ErrorMessage).ToList() };
 
+            var oAutor = _arm.Usuarios.Find(c => c.Id == token);
+
+            //Achando o autor;  
+
+            var outroAutor = new Usuario();
+
+            outroAutor.Nome = oAutor.Nome;
+            outroAutor.Email = oAutor.Email;
+
+            _publicacao.Autor = outroAutor;
+        
+         
+
+            // Setando valor do topico tipo duvida para berto
             if (_publicacao.Tipo.ToUpper() == "DUVIDA")
                 _publicacao.Aberta = "Aberta";
                
+
+
 
 
             _arm.Posts.Add(_publicacao);

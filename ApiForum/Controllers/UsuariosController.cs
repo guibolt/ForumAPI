@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Model.Views;
+using Model.Views.Exibir;
 
 namespace ApiForum.Controllers
 {
@@ -23,9 +24,9 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
-        public async Task<IActionResult> Cadastro([FromBody] Usuario usuario)
+        public async Task<IActionResult> Cadastro([FromBody] UsuarioView  Usuario)
         {
-            var Core = new UsuarioCore(usuario).CadastrarUsuario();
+            var Core = new UsuarioCore(Usuario,_mapper).CadastrarUsuario();
             return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
          
         }

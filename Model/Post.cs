@@ -12,7 +12,7 @@ namespace Model
         public string Texto { get; set; }
         public string Tipo{ get; set; }
         public string Aberta { get; set; } 
-        public string MediaVotos { get; private set; }
+        public string MediaVotos { get;  set; }
         public List<Comentario> Comentarios { get; set; } 
     }
 }

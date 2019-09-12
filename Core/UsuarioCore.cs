@@ -3,6 +3,7 @@ using Core.Util;
 using FluentValidation;
 using Model;
 using Model.Views;
+using Model.Views.Exibir;
 using System;
 using System.Linq;
 
@@ -41,6 +42,13 @@ namespace Core
             _arm = _arm ?? new Armazenamento();
         }
 
+        public UsuarioCore(UsuarioView Usuario, IMapper Mapper)
+        {
+            _mapper = Mapper;
+            _usuario = _mapper.Map<UsuarioView, Usuario>(Usuario);
+            _arm = Arquivo.Recuperar(_arm);
+            _arm = _arm ?? new Armazenamento();
+        }
 
 
         //Método para cadastro de usuario

@@ -9,5 +9,7 @@ namespace Model
         [Display(Name = "Senha do usuário")]
         public string Senha { get; set; }
         public string ConfirmaSenha { get; set; }
+        
+
     }
 }

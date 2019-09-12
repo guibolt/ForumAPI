@@ -14,6 +14,7 @@ namespace Core.Util
         {
             CreateMap<PostView, Post>();
             CreateMap<LoginUserView, Usuario>();
+            CreateMap<UsuarioView, Usuario>();
 
             CreateMap<PostAtt, Post>()
                                    .ForMember(dest => dest.Titulo, opt => opt.Condition(src => src.Titulo != null))
