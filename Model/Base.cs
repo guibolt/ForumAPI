@@ -10,6 +10,6 @@ namespace Model
     {
         public Guid Id { get;  set; } = Guid.NewGuid();
         [DisplayFormat(DataFormatString = "mm/dd/yyyy")]
-        public DateTime DataCadastro { get;  set; } = DateTime.Now;
+        public DateTime DataCadastro { get;   set; } = DateTime.Now;
     }
 }

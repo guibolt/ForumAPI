@@ -15,20 +15,11 @@ namespace Core.Util
             CreateMap<PostView, Post>();
             CreateMap<LoginUserView, Usuario>();
             CreateMap<UsuarioView, Usuario>();
-
+            CreateMap<ComentarioView, Comentario>();
             CreateMap<PostAtt, Post>()
                                    .ForMember(dest => dest.Titulo, opt => opt.Condition(src => src.Titulo != null))
                                    .ForMember(dest => dest.Texto, opt => opt.Condition(src => src.Texto != null))
-                                   .ForMember(dest => dest.Aberta, opt => opt.Condition(src => src.Aberta != null));
-
-            CreateMap<Post, Post>().ForMember(dest => dest.Id, opt => opt.Ignore())
-                                   .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
-                                   .ForMember(dest => dest.Autor, opt => opt.Ignore())
-                                   .ForMember(dest => dest.Comentarios, opt => opt.Ignore())
-                                   .ForMember(dest => dest.Titulo, opt => opt.Condition(src => src.Titulo != null))
-                                   .ForMember(dest => dest.Texto, opt => opt.Condition(src => src.Texto != null))
-                                   .ForMember(dest => dest.Aberta, opt => opt.Condition(src => src.Aberta != null));
-
+                                   .ForMember(dest => dest.Status, opt => opt.Condition(src => src.Aberta != null));
         }
     }
 }

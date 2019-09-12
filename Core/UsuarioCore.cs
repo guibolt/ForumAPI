@@ -6,6 +6,7 @@ using Model.Views;
 using Model.Views.Exibir;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Core
 {
@@ -21,15 +22,19 @@ namespace Core
             _arm = _arm ?? new Armazenamento();
         }
 
-        public UsuarioCore(Usuario Usuario)
+        public UsuarioCore(UsuarioView Usuario, IMapper Mapper)
         {
-           _usuario = Usuario;
+            _mapper = Mapper;
+
+            _usuario = _mapper.Map<UsuarioView, Usuario>(Usuario);
+
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
             RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e nao pode ser nula");
-            RuleFor(u => u.Senha).Matches(@"[a-zA-Z].*\d|\d.*[a-zA-Z]").WithMessage("A senha deve conter ao menos uma letra e um número");
+            RuleFor(u => u.Senha).Matches(@"[a-z-A-Z].\d|\d.[a-z-A-Z]").WithMessage("A senha deve conter ao menos uma letra e um número");
             RuleFor(u => u.ConfirmaSenha).Equal(_usuario.Senha).WithMessage("As senhas devem ser iguais!");
 
+         
             _arm = Arquivo.Recuperar(_arm);
             _arm = _arm ?? new Armazenamento();
         }
@@ -42,15 +47,7 @@ namespace Core
             _arm = _arm ?? new Armazenamento();
         }
 
-        public UsuarioCore(UsuarioView Usuario, IMapper Mapper)
-        {
-            _mapper = Mapper;
-            _usuario = _mapper.Map<UsuarioView, Usuario>(Usuario);
-            _arm = Arquivo.Recuperar(_arm);
-            _arm = _arm ?? new Armazenamento();
-        }
-
-
+     
         //Método para cadastro de usuario
         public Retorno CadastrarUsuario()
         {
@@ -73,20 +70,6 @@ namespace Core
 
             return usuarioLogin == null ? new Retorno { Status = false, Resultado = "Email ou senha inválidos!" }
             : new Retorno { Status = true, Resultado = new LoginRetorno { Status = true, TokenUsuario = usuarioLogin.Id, Nome = usuarioLogin.Nome } };
-
-        }
-
-        //Método para buscar um usuario se baseando no id fornecido.
-        public Retorno BuscarUsuario(string id)
-        {
-            if (!Guid.TryParse(id, out Guid ident))
-                return new Retorno { Status = false, Resultado = "Id incorreto!" };
-
-            var umUsuario = _arm.Usuarios.FirstOrDefault(u => u.Id == ident);
-
-            if (umUsuario == null) return new Retorno { Status = false, Resultado = "Esse usuario nao existe na base de dados" };
-
-            return new Retorno { Status = true, Resultado = umUsuario };
 
         }
 

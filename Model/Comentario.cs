@@ -6,7 +6,7 @@ namespace Model
 {
     public class Comentario : Base
     {
-        public string Texto { get; set; }
+        public string Msg { get; set; }
         public Guid PublicacaoId { get; set; }
         public Usuario Autor { get; set; }
         public Guid CitacaoId { get; set; }

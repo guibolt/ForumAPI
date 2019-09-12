@@ -40,14 +40,7 @@ namespace ApiForum.Controllers
 
         }
 
-        //Chamando o metodo de buscar por id usurario da core 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
-        {
-            var Core = new UsuarioCore().BuscarUsuario(id);
-            return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
-        }
-
+  
         //Chamando o metodo de listar todos da core 
         [HttpGet]
         public async Task<IActionResult> ListarTodos()

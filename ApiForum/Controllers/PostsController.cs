@@ -26,7 +26,7 @@ namespace ApiForum.Controllers
         [HttpPost]
         public async Task<IActionResult> Cadastro([FromHeader] Guid tokenAutor,[FromBody] PostView publicacao)
         {
-            var Core = new PostCore(publicacao, _mapper).Cadastrar(tokenAutor);
+            var Core = new PostCore(publicacao, _mapper).CadastrarPost(tokenAutor);
             return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
 
         }
@@ -47,17 +47,17 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de deletar por id da core 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Deletar([FromHeader] string autor, string id)
+        public async Task<IActionResult> Deletar([FromHeader] Guid tokenAutor, string id)
         {
-            var Core = new PostCore().Deletar(id);
+            var Core = new PostCore().DeletarPost(tokenAutor,id);
             return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
         }
 
         //Chamando o metodo de listar todos da core 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Atualizar([FromHeader] string autor,[FromBody] PostAtt postAtt, string id)
+        public async Task<IActionResult> Atualizar([FromHeader] Guid tokenAutor,[FromBody] PostAtt postAtt, string id)
         {
-            var Core = new PostCore(_mapper).Editar(id,postAtt);
+            var Core = new PostCore(_mapper).EditarPost(id,postAtt, tokenAutor);
             return Core.Status ? Ok(Core) : BadRequest(Core.Resultado);
         }
 
