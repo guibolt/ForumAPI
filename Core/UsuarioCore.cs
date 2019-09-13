@@ -4,9 +4,8 @@ using FluentValidation;
 using Model;
 using Model.Views;
 using Model.Views.Exibir;
-using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Core
 {
@@ -56,11 +55,11 @@ namespace Core
                 return new Retorno { Status = false, Resultado = valida.Errors.Select(a => a.ErrorMessage).ToList() };
 
             if (_arm.Usuarios.Any(e => e.Email == _usuario.Email))
-                return new Retorno { Status = false, Resultado = "Email ja cadastrado!" };
+                return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
             _arm.Usuarios.Add(_usuario);
             Arquivo.Salvar(_arm);
-            return new Retorno { Status = true, Resultado = "Usuário cadastrado com sucesso!" };
+            return new Retorno { Status = true, Resultado = new List<string> { "Usuário cadastrado com sucesso!" } };
         }
 
         //Método para logar o usuario na plataforma.
@@ -68,7 +67,7 @@ namespace Core
         {
             var usuarioLogin = _arm.Usuarios.Find(u => u.Email == _usuario.Email && u.Senha == _usuario.Senha);
 
-            return usuarioLogin == null ? new Retorno { Status = false, Resultado = "Email ou senha inválidos!" }
+            return usuarioLogin == null ? new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } }
             : new Retorno { Status = true, Resultado = new LoginRetorno { Status = true, TokenUsuario = usuarioLogin.Id, Nome = usuarioLogin.Nome } };
 
         }

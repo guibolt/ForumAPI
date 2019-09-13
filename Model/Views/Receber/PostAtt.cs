@@ -8,6 +8,6 @@ namespace Model.Views.Exibir
     {
         public string Titulo { get; set; }
         public string Texto { get; set; }
-        public string  Aberta { get; set; }
+        public string  Status { get; set; }
     }
 }

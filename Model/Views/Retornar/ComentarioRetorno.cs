@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Model.Views.Exibir
+namespace Model.Views.Retornar
 {
-    public class ComentarioView
+    public class ComentarioRetorno
     {
+        public Guid Id { get; set; }
         public Guid PublicacaoId { get; set; }
         public string ComentarioId { get; set; }
         public string CitacaoId { get; set; }
