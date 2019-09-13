@@ -79,7 +79,7 @@ namespace Core
            
             return new Retorno { Status = false, Resultado = new List<string> { "Tipo da publicacao deve ser tutorial ou duvida!" } };
         }
-
+        ///
         //Método para efetuar a editaçao de uma publicacao
         public Retorno EditarPost(string id ,PostAtt postatt, string tokenAutor)
         {
@@ -122,7 +122,7 @@ namespace Core
                 umPost.Status = null;
 
             //verifico se o status fornecido é valido
-            if (umPost.Status.ToUpper() != "FECHADA")
+            if (umPost.Status.ToUpper() != "FECHADA" && umPost.Status.ToUpper() != "ABERTA")
                 return new Retorno { Status = false, Resultado = new List<string> { "Para fechar uma publicacao , é necessario mudar o status para fechada" } };
 
 
@@ -192,6 +192,7 @@ namespace Core
 
             if(post.Comentarios != null)
             {
+
                 foreach (var comentario in post.Comentarios)
                 {
                     var outroComentario = _arm.Comentarios.Find(c => c.PublicacaoId == comentario.PublicacaoId);
