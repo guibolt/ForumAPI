@@ -18,6 +18,9 @@ namespace Core.Util
             CreateMap<LoginUserView, Usuario>();
             CreateMap<UsuarioView, Usuario>();
             CreateMap<ComentarioView, Comentario>();
+            CreateMap<VotoView, Voto>();
+            CreateMap<VotoPostView, VotoPost>();
+
             CreateMap<Comentario, ComentarioRetorno>().ForMember(dest => dest.ComentarioId, opt => opt.Condition(src => src.ComentarioId != null))
                                    .ForMember(dest => dest.PublicacaoId, opt => opt.Condition(src => src.PublicacaoId != null));
 

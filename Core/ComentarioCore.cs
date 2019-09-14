@@ -91,6 +91,7 @@ namespace Core
             if(umComentario.AutorId != usuarioForum.Id.ToString())
                 return new Retorno { Status = false, Resultado = new List<string> { "Autor do comentario inválido" } };
 
+            //verifico a tamanho dos textos 
             if(comentarioAtt.Msg.Length <10 || comentarioAtt.Msg.Length >500)
                 return new Retorno { Status = false, Resultado = new List<string> { "Tamanho da mensagem inválido, digite entre 10 e 500 caracteres" } };
 
@@ -101,18 +102,19 @@ namespace Core
 
         }
 
-
+        // método para buscar um comentrio por id
         public Retorno BuscarComentario(string tokenAutor, string idComent)
         {
             // conversoes dos guids
             if (!Guid.TryParse(tokenAutor, out Guid token) || !_arm.Usuarios.Any(e => e.Id == token) || (!Guid.TryParse(idComent, out Guid comentarioId) ) )
                 return new Retorno { Status = false, Resultado = new List<string> { "Dádos inválidos" } };
 
-
+            // procuro um comentario e verifico se existe
             var umComentario = _arm.Comentarios.Find(c => c.Id == comentarioId);
 
             if (umComentario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Comentario inválido" } };
+            AtualizaVoto(umComentario);
 
             return new Retorno { Status = true, Resultado = _mapper.Map<ComentarioRetorno>(umComentario)};
         }
@@ -124,21 +126,71 @@ namespace Core
             if (!Guid.TryParse(tokenAutor, out Guid token) || !_arm.Usuarios.Any(e => e.Id == token) || (!Guid.TryParse(idComent, out Guid comentarioId)))
                 return new Retorno { Status = false, Resultado = new List<string> { "Dádos inválidos" } };
 
-
+            // procuro um comentario e verifico se existe
             var umComentario = _arm.Comentarios.Find(c => c.Id == comentarioId);
 
+            // validacoes para a atualizacao do comentario.
             if (umComentario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Comentario inválido" } };
 
             if(umComentario.CitacaoId != null || umComentario.ComentarioId != null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel deletar este comentario" } };
 
-
+            _arm.Comentarios.Remove(umComentario);
+            Arquivo.Salvar(_arm);
             return new Retorno { Status = true, Resultado = new List<string> { "Comentario deletado com sucesso!" } };
 
         }
 
+        public Retorno VotarComentario(string tokenAutor, VotoView voto)
+        {
+            var votosPossiveis = new List<double> { 0.5, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0 };
 
-        public Retorno TodosComentarios() => new Retorno { Status = true, Resultado = _arm.Comentarios };
+            if (!Guid.TryParse(tokenAutor, out Guid token) || !_arm.Usuarios.Any(e => e.Id == token) )
+                return new Retorno { Status = false, Resultado = new List<string> { "Dádos inválidos" } };
+
+
+            if (_arm.Comentarios.Any(p => p.Id == voto.ComentarioId))
+                return new Retorno { Status = false, Resultado = new List<string> { "Comentario nao existe" } };
+
+            var VotoMap =_mapper.Map<VotoView, Voto>(voto);
+
+            var votosDoComentario = _arm.Votos.Where(c => c.ComentarioId == VotoMap.ComentarioId).ToList();
+
+            if(votosDoComentario.Any(c => c.UsuarioId == token))
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel votar duas vezes no mesmo comentario!" } };
+
+            VotoMap.UsuarioId = token;
+
+            if(!Double.TryParse(voto.Nota, out double notaVot) || !votosPossiveis.Contains(notaVot) )
+            return new Retorno { Status = false, Resultado = new List<string> { "Voto inváldo" } };
+
+            _arm.Votos.Add(VotoMap);
+
+            Arquivo.Salvar(_arm);
+
+            return new Retorno { Status = true, Resultado = new List<string> { "Voto computado com sucesso!" } };
+        }
+
+        public void AtualizaVoto(Comentario comentario)
+        {
+            var votosDoComentario = _arm.Votos.Where(c => c.ComentarioId == comentario.Id).ToList();
+
+            double contador = 0;
+
+            votosDoComentario.ForEach(c => contador = Convert.ToDouble(c.Nota));
+         
+            double mediaTotal = contador / votosDoComentario.Count();
+
+            comentario.MediaVotos = mediaTotal.ToString();
+        }
+
+        public Retorno TodosComentarios()
+        {
+            _arm.Comentarios.ForEach(c => AtualizaVoto(c));
+            return new Retorno { Status = true, Resultado = _arm.Comentarios };
+        }
+
+
     }
 }

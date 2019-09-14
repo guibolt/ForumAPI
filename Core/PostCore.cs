@@ -4,6 +4,7 @@ using FluentValidation;
 using Model;
 using Model.Views;
 using Model.Views.Exibir;
+using Model.Views.Receber;
 using Model.Views.Retornar;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace Core
 
             RuleFor(p => p.Titulo).NotNull().Length(8, 250).WithMessage("O título deve ter entre 8 e 250 caracteres");
             RuleFor(p => p.Texto).NotNull().MinimumLength(50).WithMessage("O texto deve ter no mínimo 50 caracteres");
-     
+
             _arm = Arquivo.Recuperar(_arm);
             _arm = _arm ?? new Armazenamento();
         }
@@ -47,7 +48,7 @@ namespace Core
             try
             {
                 //Validação do tipo da publicação
-                if (_publicacao.Tipo.ToUpper() == "TUTORIAL" || _publicacao.Tipo.ToUpper() == "DUVIDA")
+                if (_publicacao.Tipo.ToUpper() == "TUTORIAL" || _publicacao.Tipo.ToUpper() == "DUVIDA" || _publicacao.Tipo.ToUpper() == "DúVIDA")
                 {
                     if (!Guid.TryParse(tokenAutor, out Guid token))
                         return new Retorno { Status = false, Resultado = new List<string> { "Token inválido" } };
@@ -55,7 +56,6 @@ namespace Core
                     var valido = Validate(_publicacao);
                     if (!valido.IsValid)
                         return new Retorno { Status = false, Resultado = valido.Errors.Select(e => e.ErrorMessage).ToList() };
-
 
                     //Busco pelo autor do post
                     var oAutor = _arm.Usuarios.Find(c => c.Id == token);
@@ -75,13 +75,13 @@ namespace Core
                     return new Retorno { Status = true, Resultado = new List<string> { "Publicacão registrada com sucesso!" } };
                 }
             }
-            catch (Exception) {  return new Retorno { Status = false, Resultado = new List<string> { "O tipo da publicaçao nao pode ser nula." } }; ;}
-           
+            catch (Exception) { return new Retorno { Status = false, Resultado = new List<string> { "O tipo da publicaçao nao pode ser nula." } }; ; }
+
             return new Retorno { Status = false, Resultado = new List<string> { "Tipo da publicacao deve ser tutorial ou duvida!" } };
         }
         ///
         //Método para efetuar a editaçao de uma publicacao
-        public Retorno EditarPost(string id ,PostAtt postatt, string tokenAutor)
+        public Retorno EditarPost(string id, PostAtt postatt, string tokenAutor)
         {
             //tento realizar a conversao do guid
             if (!Guid.TryParse(id, out Guid ident)) return new Retorno { Status = false, Resultado = new List<string> { "Id inválido" } };
@@ -114,7 +114,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar esse post negada" } };
 
             //mapeamento
-            _mapper.Map(postatt, umPost );
+            _mapper.Map(postatt, umPost);
 
 
             //Validação para limitar a mudança de status de aberta nos post do tipo tutorial
@@ -132,7 +132,7 @@ namespace Core
 
         //Método para deletar uma publicacao se baseando no id
         public Retorno DeletarPost(string tokenAutor, string id)
-                                  {
+        {
             if (!Guid.TryParse(id, out Guid ident))
                 return new Retorno { Status = false, Resultado = new List<string> { "Id inválido" } };
 
@@ -170,9 +170,13 @@ namespace Core
             if (umPost == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Publicação nao existe na base de dados" } };
 
+
+            if (umPost.Tipo.ToUpper() == "TUTORIAL")
+                AtualizaVoto(umPost);
+            
             AtualizarComentarios(umPost);
-                
-                return new Retorno { Status = true, Resultado = umPost };
+
+            return new Retorno { Status = true, Resultado = umPost };
         }
         //método para listar todas as publicacoes
         public Retorno ListarTodos(string tokenAutor)
@@ -180,19 +184,29 @@ namespace Core
             if (!Guid.TryParse(tokenAutor, out Guid token) || !_arm.Usuarios.Any(e => e.Id == token))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada" } };
 
-          
+
             var todosPosts = _arm.Posts;
+           
             todosPosts.ForEach(p => AtualizarComentarios(p));
+
+            foreach (var post in todosPosts)
+            {
+                if (post.Tipo.ToUpper() == "TUTORIAL" && _arm.VotosPost.Any(c => c.PostId == post.Id))
+                    AtualizaVoto(post);
+                
+            }
             return todosPosts.Count == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não existe registros na base de dados" } } : new Retorno { Status = true, Resultado = todosPosts };
         }
 
+        //Método para atribuir a lista de comentarios.
         public void AtualizarComentarios(Post post)
         {
+            // lista de comentarios da publicacao
             var listaTotal = _arm.Comentarios.Where(e => e.PublicacaoId == post.Id).ToList();
 
-            if(post.Comentarios != null)
+            if (post.Comentarios != null)
             {
-
+                // procuro pelos comentarios internos
                 foreach (var comentario in post.Comentarios)
                 {
                     var outroComentario = _arm.Comentarios.Find(c => c.PublicacaoId == comentario.PublicacaoId);
@@ -202,10 +216,56 @@ namespace Core
 
                     listaTotal = comentario.Replicas;
                 }
-                
+
             }
 
+           if(listaTotal != null)
             post.Comentarios = listaTotal;
+        }
+
+
+        public Retorno VotarPost(string tokenAutor, VotoPostView voto)
+        {
+            var votosPossiveis = new List<double> { 0.5, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0 };
+
+            if (!Guid.TryParse(tokenAutor, out Guid token) || !_arm.Usuarios.Any(e => e.Id == token))
+                return new Retorno { Status = false, Resultado = new List<string> { "Dádos inválidos" } };
+
+            if(!_arm.Posts.Any(p => p.Id == voto.PostId))
+                return new Retorno { Status = false, Resultado = new List<string> { "Publicacao nao existe" } };
+
+            var votosdoPost = _arm.Votos.Where(c => c.PostId == voto.PostId).ToList();
+
+            if (votosdoPost.Any(c => c.UsuarioId == token))
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel votar duas vezes no mesmo comentario!" } };
+
+            var votoMap = _mapper.Map<VotoPostView, VotoPost>(voto);
+
+            if (!Double.TryParse(votoMap.Nota, out double notaVot))
+                return new Retorno { Status = false, Resultado = new List<string> { "Voto inváldo" } };
+
+            if (!votosPossiveis.Contains(notaVot))
+                return new Retorno { Status = false, Resultado = new List<string> { "Voto inváldo, escreve um voto entre 0.5 e 5" } };
+
+            votoMap.UsuarioId = token;
+
+            _arm.VotosPost.Add(votoMap);
+            Arquivo.Salvar(_arm);
+
+            return new Retorno { Status = true, Resultado = new List<string> { "Voto computado com sucesso!" } };
+        }
+
+        public void AtualizaVoto(Post post)
+        {
+            var votosdoPost = _arm.VotosPost.Where(c => c.PostId == post.Id).ToList();
+
+            double contador = 0;
+
+            votosdoPost.ForEach(c => contador = Convert.ToDouble(c.Nota));
+
+            double mediaTotal = contador / votosdoPost.Count();
+
+            post.MediaVotos = mediaTotal.ToString();
         }
     }
 }

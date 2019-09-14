@@ -11,5 +11,6 @@ namespace Model.Views.Retornar
         public string ComentarioId { get; set; }
         public string CitacaoId { get; set; }
         public string Msg { get; set; }
+        public string MediaVotos { get; set; }
     }
 }

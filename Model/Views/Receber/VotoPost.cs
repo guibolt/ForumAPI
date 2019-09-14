@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Model
+namespace Model.Views.Receber
 {
-    public class Voto
+   public class VotoPost
     {
         public Guid PostId { get; set; }
         public Guid UsuarioId { get; set; }
-        public Guid ComentarioId { get; set; }
         public string Nota { get; set; }
     }
 }

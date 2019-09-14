@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Model.Views.Receber;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,8 @@ namespace Model
         public List<Usuario> Usuarios { get; set; } = new List<Usuario>();
         public List<Voto> Votos { get; set; } = new List<Voto>();
         public List<Comentario> Comentarios { get; set; } = new List<Comentario>();
+        public List<VotoPost> VotosPost { get; set; } = new List<VotoPost>();
+        
 
     }
 }

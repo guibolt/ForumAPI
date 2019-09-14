@@ -2,6 +2,7 @@
 using AutoMapper;
 using Core;
 using Microsoft.AspNetCore.Mvc;
+using Model;
 using Model.Views.Exibir;
 using Model.Views.Receber;
 
@@ -25,6 +26,15 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
 
         }
+
+        //Chamando o metodo de cadastro da core 
+        [HttpPost("Votar")]
+        public async Task<IActionResult> VotarComentario([FromHeader] string tokenAutor, [FromBody] VotoView Voto)
+        {
+            var Core = new ComentarioCore(_mapper).VotarComentario(tokenAutor,Voto);
+            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+        }
+
         //Chamando o metodo de listar por id da core 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get([FromHeader]string tokenAutor,string id)
