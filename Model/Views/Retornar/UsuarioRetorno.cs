@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Model.Views.Retornar
+﻿namespace Model.Views.Retornar
 {
     public class UsuarioRetorno
     {
