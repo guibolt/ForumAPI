@@ -6,6 +6,7 @@ using Model;
 using Model.Views;
 using Model.Views.Exibir;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 
 namespace Core
@@ -14,15 +15,15 @@ namespace Core
     {
         private Usuario _usuario;
         //private readonly IMapper _mapper;
-        public  ForumContext _dbcontext { get; set; }
-   
+        public ForumContext _dbcontext { get; set; }
+
         public UsuarioCore(ForumContext Context)
         {
             _dbcontext = Context;
             _dbcontext.Usuarios = _dbcontext.Set<Usuario>();
         }
 
-        public UsuarioCore( Usuario Usuario ,ForumContext Context)
+        public UsuarioCore(Usuario Usuario, ForumContext Context)
         {
 
 
@@ -38,7 +39,7 @@ namespace Core
             RuleFor(u => u.ConfirmaSenha).Equal(_usuario.Senha).WithMessage("As senhas devem ser iguais!");
         }
 
-    
+
         //Método para cadastro de usuario
         public Retorno CadastrarUsuario()
         {
@@ -60,15 +61,20 @@ namespace Core
         public Retorno LogarUsuario()
         {
             var usuarioLogin = _dbcontext.Usuarios.FirstOrDefault(u => u.Email == _usuario.Email && u.Senha == _usuario.Senha);
+            dynamic obj = new ExpandoObject();
 
-            return usuarioLogin == null ? new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } }
-            : new Retorno { Status = true, Resultado = new LoginRetorno { Status = true, TokenUsuario = usuarioLogin.Id, Nome = usuarioLogin.Nome } };
 
+            if (usuarioLogin == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
+
+            obj.Status = true;
+            obj.TokenUsuario = usuarioLogin.Id;
+            obj.Nome = usuarioLogin.Nome;
+
+            return new Retorno { Status = true, Resultado = obj };
         }
 
         public Retorno Listar() => new Retorno { Status = true, Resultado = _dbcontext.Usuarios.ToList() };
-
-       
 
         public void AtualizaUp(Usuario user)
         {

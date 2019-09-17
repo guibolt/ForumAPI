@@ -37,19 +37,11 @@ namespace Model.Migrations
 
                     b.Property<double?>("Nota");
 
-                    b.Property<Guid>("PublicacaoId");
+                    b.Property<Guid>("PostId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AutorId");
-
-                    b.HasIndex("CitacaoId")
-                        .IsUnique()
-                        .HasFilter("[CitacaoId] IS NOT NULL");
-
-                    b.HasIndex("ComentarioId");
-
-                    b.HasIndex("PublicacaoId");
 
                     b.ToTable("Comentarios");
                 });
@@ -74,11 +66,9 @@ namespace Model.Migrations
                     b.Property<string>("Titulo")
                         .HasMaxLength(250);
 
-                    b.Property<Guid?>("Usuario");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Usuario");
+                    b.HasIndex("AutorID");
 
                     b.ToTable("Posts");
                 });
@@ -109,26 +99,14 @@ namespace Model.Migrations
                         .WithMany()
                         .HasForeignKey("AutorId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Model.Comment", "Citacao")
-                        .WithOne()
-                        .HasForeignKey("Model.Comment", "CitacaoId");
-
-                    b.HasOne("Model.Comment", "Comentario")
-                        .WithMany()
-                        .HasForeignKey("ComentarioId");
-
-                    b.HasOne("Model.Post", "Publicacao")
-                        .WithMany("Comentarios")
-                        .HasForeignKey("PublicacaoId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Model.Post", b =>
                 {
                     b.HasOne("Model.Usuario", "Autor")
                         .WithMany()
-                        .HasForeignKey("Usuario");
+                        .HasForeignKey("AutorID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

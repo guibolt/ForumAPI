@@ -1,4 +1,4 @@
-﻿using Model.Views.Retornar;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,8 +8,10 @@ namespace Model
 {
     public class Post : Base
     {
-        [ForeignKey("Usuario")]
+      
         public Usuario Autor { get; set; }
+        [JsonIgnore]
+        [ForeignKey("Usuarios")]
         public Guid AutorID { get; set; }
 
         [MinLength(8), MaxLength(250)]
@@ -19,6 +21,7 @@ namespace Model
         public string Tipo { get; set; }
         public string Status { get; set; }
         public double ? MediaVotos { get; set; }
+        [NotMapped]
         public List<Comment> Comentarios { get; set; }
     }
 }

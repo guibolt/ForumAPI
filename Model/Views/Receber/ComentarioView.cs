@@ -6,7 +6,7 @@ namespace Model.Views.Exibir
 {
     public class ComentarioView
     {
-        public Guid PublicacaoId { get; set; }
+        public Guid PostId { get; set; }
         public string ComentarioId { get; set; }
         public string CitacaoId { get; set; }
         public string Msg { get; set; }

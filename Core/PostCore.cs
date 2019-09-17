@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
-using Core.Util;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Afins;
 using Model.Views;
 using Model.Views.Exibir;
-using Model.Views.Receber;
-using Model.Views.Retornar;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 
 namespace Core
@@ -65,10 +64,9 @@ namespace Core
 
                     //atribuo o autor ao post
                     _publicacao.AutorID = Guid.Parse(tokenAutor);
-                    _publicacao.Autor = new Usuario { Nome = oAutor.Nome, Email = oAutor.Email };
 
                     // Setando valor do topico tipo duvida para berto
-                    if (_publicacao.Tipo.ToUpper() == "DUVIDA")
+                    if (_publicacao.Tipo.ToUpper() == "DUVIDA" || _publicacao.Tipo.ToUpper() == "DÚVIDA")
                         _publicacao.Status = "aberta";
 
                     //adiciono o salvo na lista 
@@ -165,13 +163,13 @@ namespace Core
         //método para listar uma publicacao por id
         public Retorno ListarPorId(string id, string tokenAutor)
         {
-             if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext))
-                        return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
+            if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
             if (!Guid.TryParse(id, out Guid ident))
                 return new Retorno { Status = false, Resultado = new List<string> { "Id inválido" } };
 
-            var umPost = _dbcontext.Posts.FirstOrDefault(p => p.Id == ident);
+            var umPost = _dbcontext.Posts.Include(c => c.Autor).FirstOrDefault(p => p.Id == ident);
             if (umPost == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Publicação nao existe na base de dados" } };
 
@@ -184,8 +182,17 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var todosPosts = _dbcontext.Posts;
-            return todosPosts.Count() == 0  ? new Retorno { Status = false, Resultado = new List<string> { "Não existe registros na base de dados" } } : new Retorno { Status = true, Resultado = todosPosts };
+            var todosPosts = _dbcontext.Posts.Include(e => e.Comentarios).Include(c => c.Autor).ToList();
+           
+
+            return todosPosts.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não existe registros na base de dados" } } : new Retorno { Status = true, Resultado = todosPosts };
         }
+
+
+        //public void AtribuiAutor(Post post)
+        //{
+        //    var umAutor = _dbcontext.Usuarios.FirstOrDefault(c => c.Id == post.AutorID);
+        //    post.Autor = new Usuario { Nome = umAutor.Nome, Email = umAutor.Email };
+        //}
     }
 }

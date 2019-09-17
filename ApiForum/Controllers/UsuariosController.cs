@@ -33,7 +33,7 @@ namespace ApiForum.Controllers
         public async Task<IActionResult> Logar([FromBody] Usuario usuario)
         {
             var Core = new UsuarioCore(usuario, _contexto).LogarUsuario();
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core.Resultado) : (IActionResult)BadRequest(Core);
         }
 
         //Chamando o metodo de listar todos da core 

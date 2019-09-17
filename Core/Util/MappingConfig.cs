@@ -3,10 +3,6 @@ using Model;
 using Model.Views;
 using Model.Views.Exibir;
 using Model.Views.Receber;
-using Model.Views.Retornar;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Core.Util
 {

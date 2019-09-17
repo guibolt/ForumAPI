@@ -29,7 +29,6 @@ namespace Model.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
-                    Usuario = table.Column<Guid>(nullable: true),
                     AutorID = table.Column<Guid>(nullable: false),
                     Titulo = table.Column<string>(maxLength: 250, nullable: true),
                     Texto = table.Column<string>(nullable: true),
@@ -41,11 +40,11 @@ namespace Model.Migrations
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Usuarios_Usuario",
-                        column: x => x.Usuario,
+                        name: "FK_Posts_Usuarios_AutorID",
+                        column: x => x.AutorID,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -54,7 +53,7 @@ namespace Model.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
-                    PublicacaoId = table.Column<Guid>(nullable: false),
+                    PostId = table.Column<Guid>(nullable: false),
                     ComentarioId = table.Column<Guid>(nullable: true),
                     CitacaoId = table.Column<Guid>(nullable: true),
                     AutorId = table.Column<Guid>(nullable: false),
@@ -83,12 +82,14 @@ namespace Model.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Comentarios_Posts_PublicacaoId",
-                        column: x => x.PublicacaoId,
+                        name: "FK_Comentarios_Posts_PostId",
+                        column: x => x.PostId,
                         principalTable: "Posts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comentarios_AutorId",
@@ -96,26 +97,9 @@ namespace Model.Migrations
                 column: "AutorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comentarios_CitacaoId",
-                table: "Comentarios",
-                column: "CitacaoId",
-                unique: true,
-                filter: "[CitacaoId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comentarios_ComentarioId",
-                table: "Comentarios",
-                column: "ComentarioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comentarios_PublicacaoId",
-                table: "Comentarios",
-                column: "PublicacaoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Posts_Usuario",
+                name: "IX_Posts_AutorID",
                 table: "Posts",
-                column: "Usuario");
+                column: "AutorID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
