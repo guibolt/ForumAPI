@@ -10,17 +10,12 @@ namespace ApiForum.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        // propriedade automapper
-        private readonly IMapper _mapper;
         //Construtor contendo o contexto.
         private ForumContext _contexto { get; set; }
     
         // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public UsuariosController(IMapper mapper, ForumContext contexto)
-        {  _mapper  = mapper;
-           _contexto = contexto;
-        }
-
+        public UsuariosController(ForumContext contexto) =>  _contexto = contexto;
+      
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
         public async Task<IActionResult> Cadastro([FromBody] Usuario Usuario)
@@ -33,9 +28,8 @@ namespace ApiForum.Controllers
         public async Task<IActionResult> Logar([FromBody] Usuario usuario)
         {
             var Core = new UsuarioCore(usuario, _contexto).LogarUsuario();
-            return Core.Status ? Ok(Core.Resultado) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
-
         //Chamando o metodo de listar todos da core 
         [HttpGet]
         public async Task<IActionResult> ListarTodos()

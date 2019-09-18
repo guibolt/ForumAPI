@@ -16,44 +16,35 @@ namespace Core
         private Comment _comentario;
         private readonly IMapper _mapper;
         public ForumContext _dbcontext { get; set; }
-
-        public ComentarioCore(ForumContext Contexto)
-        {
-            _dbcontext = Contexto;
-            _dbcontext.Comentarios = _dbcontext.Set<Comment>();
-        }
+        public ComentarioCore(ForumContext Contexto) => _dbcontext = Contexto;
+          
         public ComentarioCore(IMapper Mapper, ForumContext Contexto)
         {
             _mapper = Mapper;
             _dbcontext = Contexto;
-            _dbcontext.Comentarios = _dbcontext.Set<Comment>();
-
         }
 
         public ComentarioCore(ComentarioView Comentario, IMapper Mapper, ForumContext Contexto)
         {
             _dbcontext = Contexto;
             _mapper = Mapper;
-            _dbcontext.Comentarios = _dbcontext.Set<Comment>();
             _comentario = _mapper.Map<ComentarioView, Comment>(Comentario);
 
             RuleFor(c => c.Msg).Length(10, 500).WithMessage("O comentario deve ficar entre 10 e 500 caracteres");
-
         }
 
         //Método para comentar
         public Retorno Comentar(string tokenAutor)
         {
-
-            if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext));
+            // Verifico se o token do usuario é valido e se ele esta logado
+            if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada" } };
 
             //busco a publicacao em questao
             var umPost = _dbcontext.Posts.FirstOrDefault(c => c.Id == _comentario.PostId);
 
-
             if (umPost == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Publicacao nao existe" } };
-
 
             _comentario.AutorId = Guid.Parse(tokenAutor);
 
@@ -63,23 +54,19 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { "Comentário cadastrado com sucesso!" } };
         }
-
         public Retorno EditarComentario(string tokenAutor, ComentarioAtt comentarioAtt, string comentarioId)
         {
-          
+            // Verifico se o token do usuario é valido e se ele esta logado
             if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorinazacao negada" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada" } };
 
             if (!Guid.TryParse(comentarioId, out Guid comentId))
-                return new Retorno { Status = false, Resultado = new List<string> { "Comentário inválido" } };
-
-  
-
+                return new Retorno { Status = false, Resultado = new List<string> { "Id do Comentário inválido" } };
 
             var umComentario = _dbcontext.Comentarios.Include(c => c.Autor).FirstOrDefault(c => c.Id == comentId);
 
             if(umComentario == null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Comentário inválido" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Comentário nao existe" } };
             // validacao do autor 
             if (umComentario.AutorId != Guid.Parse(tokenAutor)) 
                 return new Retorno { Status = false, Resultado = new List<string> { "Autor do comentario inválido" } };
@@ -101,7 +88,6 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _dbcontext) || (!Guid.TryParse(idComent, out Guid comentarioId)))
                 return new Retorno { Status = false, Resultado = new List<string> { "Dádos inválidos" } };
 
-            
             // procuro um comentario e verifico se existe
             var umComentario = _dbcontext.Comentarios.Include(c => c.Autor).FirstOrDefault(c => c.Id == comentarioId);
 
@@ -111,7 +97,6 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = umComentario };
         }
-
         public Retorno DeletarComentario(string tokenAutor, string idComent)
         {
             // conversoes dos guids
@@ -128,19 +113,15 @@ namespace Core
             if (umComentario.CitacaoId != null || umComentario.ComentarioId != null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel deletar este comentario" } };
 
+            //Tento realizar a remoção, se nao acontecer retorno uma mensagem para o usuario.
             try
             {
                 _dbcontext.Comentarios.Remove(umComentario);
                 _dbcontext.SaveChanges();
             }
-            catch (Exception)
-            {
-
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel deletar esse comentario, pois ele esta relacionado com outro!" } };
-            }
+            catch (Exception){   return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel deletar esse comentario, pois ele esta relacionado com outro!" } }; }
         
             return new Retorno { Status = true, Resultado = new List<string> { "Comentario deletado com sucesso!" } };
-
         }
     }
 }
